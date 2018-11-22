@@ -1,0 +1,86 @@
+<div id="raTable_{{vm.qInfo.qId}}" class="raExtensionContainer" qv-extension style="height:100%;width:100%;">
+  <div class="scrollbar-animation scrollbar-track vertical" ng-if="vm.virtualScroll.showScroll" ng-style="{'height': vm.virtualScroll.sbHeightpx, 'top': vm.virtualScroll.sbToppx}">
+    <div id="sbHitArea_{{vm.qInfo.qId}}" ng-mousedown="scrollMouseDown($event, false)" ng-mouseup="scrollMouseUp($event)" ng-mousemove="scrollMouseMove($event)" ng-style="trackHitAreaStyle" class="scrollbar-hitarea">
+    </div>
+    <div class="scrollbar-thumb" ng-mousedown="scrollMouseDown($event, true)" ng-mouseup="scrollMouseUp($event)" ng-style="{'height': vm.virtualScroll.sbThumbHpx, 'top': vm.virtualScroll.sbThumbYpx}">
+    </div>
+  </div>
+  <div class="raTableContainer">
+    <table class="tableSection" qva-delegated-activate="true;true">
+      <thead id="raTableHead_{{vm.qInfo.qId}}">
+        <tr ng-if="vm.props.header.showHeader" ng-style="headerStyle()">
+          <th class="raTableCell" ng-class="headerCellClass(dim, false)" ng-style="headerCellStyle(dim)" ng-if="showDimensionColumn(dim)" ng-click="headerClicked($event, $index, dim)" ng-repeat="dim in vm.qHyperCube.qDimensionInfo">
+            <div class="raHeaderCell">
+              <div class="raDataCell" ng-class="{searchableCol: dim.isSearchable}" ng-bind="dim.headerText"></div>
+                <i ng-if="dim.isOrderedBy" ng-class="{'qv-st-sorting-indicator lui-icon lui-icon--small lui-icon--triangle-top': dim.qSortIndicator === 'A',
+                  'qv-st-sorting-indicator lui-icon lui-icon--small lui-icon--triangle-bottom': dim.qSortIndicator === 'D'}">
+                </i>
+              <div class="colSearchIconContainer" search-col="" ng-mouseup="searchHeader($event, dim)">
+                <i ng-if="dim.isSearchable" search-col="" class="columnSearchIcon lui-icon lui-icon--search" title="Search"></i>
+              </div>
+            </div>
+          </th>
+          <th class="raTableCell" ng-class="headerCellClass(mea, false)" ng-style="headerCellStyle(mea)" ng-if="showMeasureColumn(mea)" ng-click="headerClicked($event, $index + vm.qHyperCube.qDimensionInfo.length, mea)" ng-repeat="mea in vm.qHyperCube.qMeasureInfo">
+            <div class="raHeaderCell">
+            <div class="raDataCell" ng-bind="mea.headerText"></div>
+              <i ng-if="mea.isOrderedBy" ng-class="{'qv-st-sorting-indicator lui-icon lui-icon--small lui-icon--triangle-top': mea.qSortIndicator === 'A', 'qv-st-sorting-indicator lui-icon lui-icon--small lui-icon--triangle-bottom': mea.qSortIndicator === 'D'}">
+              </i>
+            </div>
+          </th>
+        </tr>
+        <tr class="totalRow" ng-style="totalsRowStyle()" ng-if="showTotalRow('top')">
+          <td class="raTableCell" ng-class="headerCellClass(dim, true)" ng-style="headerCellStyle(dim)" ng-if="showDimColumnByIndex($index)" ng-repeat="dim in vm.qHyperCube.qDimensionInfo track by $index">
+            <div class="raHeaderCell">
+              <div class="raDataCell raTotalCell">
+                <span ng-if="$index==0" ng-bind="vm.props.totals.totalsLabel"></span>
+              </div>
+            </div>
+          </td>
+          <td class="raTableCell" ng-class="{cellBorderRight: meaCellClassByIndex($index)}" ng-if="showMeaColumnByIndex($index)" ng-style="measureCellStyle($index)" ng-repeat="tot in vm.qHyperCube.qGrandTotalRow track by $index">
+            <div class="raHeaderCell">
+              <div class="raDataCell raTotalCell" ng-show="showMeasureTotalValue($index)" ng-bind="tot.qText"></div>
+            </div>
+          </td>
+        </tr>
+      </thead>
+      <tfoot id="raTableFoot_{{vm.qInfo.qId}}" ng-if="showTotalRow('bottom')">
+        <tr class="totalRowBottom" ng-style="totalsRowStyle()">
+          <td class="raTableCell" ng-class="headerCellClass(dim, true)" ng-style="headerCellStyle(dim)" ng-if="showDimColumnByIndex($index)" ng-repeat="dim in vm.qHyperCube.qDimensionInfo track by $index">
+            <div class="raDataCell raTotalCell">
+              <span ng-if="$index==0" ng-bind="vm.props.totals.totalsLabel"></span>
+            </div>
+          </td>
+          <td class="raTableCell" ng-class="meaCellClassByIndex($index)" ng-if="showMeaColumnByIndex($index)" ng-style="measureCellStyle($index)" ng-repeat="tot in vm.qHyperCube.qGrandTotalRow track by $index">
+            <div class="raDataCell raTotalCell" ng-show="showMeasureTotalValue($index)" ng-bind="tot.qText"></div>
+          </td>
+        </tr>
+      </tfoot>
+      <tbody id="raTableBody_{{vm.qInfo.qId}}">
+        <tr class="raTableRow raTableRowHighLight_{{vm.qInfo.qId}}" ng-class="{rowHighlight: vm.props.rows.highlightRows}" ng-style="{'text-align': row.style.textAlign,
+                'color': row.style.color,
+                'background-color': row.style.backgroundColor,
+                'font-weight': row.style.fontWeight,
+                'text-decoration': row.style.textDecoration,
+                'border-bottom': row.style.borderBottom,
+                'font-style': row.style.fontStyle}"
+                ng-repeat="row in vm.grid track by getRowTrackBy(row)">
+          <td ng-class="{cellBorderRight: col.style.showBorder,
+                 rowHighlight: vm.props.rows.highlightRows,
+                 selectable: $index < vm.qHyperCube.qDimensionInfo.length}"
+              ng-style="{'width': col.style.width,
+                'max-width': col.style.maxWidth,
+                'text-align': col.style.textAlign,
+                'color': col.style.color,
+                'background-color': col.style.backgroundColor}"
+                ng-if="col.style.showColumn" data-dimension="{{$index}}" data-value="{{col.qElemNumber}}" ng-click="cellClick($event, col.qElemNumber, row)" ng-repeat="col in row track by $index">
+            <div ng-if="col.style.cellRepresentation == 'txt'" class="raDataCell" ng-bind-html="col.qText">
+            </div>
+            <div ng-if="col.style.cellRepresentation == 'pb'" class="raDataCell progressValue" ng-style="{'width': col.pbStyle.width, 'backgroundColor': col.pbStyle.backgroundColor}">
+              <span ng-bind-html="col.progressBarDisplayValue"></span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
