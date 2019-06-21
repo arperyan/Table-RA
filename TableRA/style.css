@@ -128,7 +128,7 @@ table.aTableSection td.numeric {
 
 
 table.aTableSection tr {
-    width: 100%;
+    width: calc(100% - 0.5px);
     text-align: left;
     display: table;
     table-layout: fixed;
